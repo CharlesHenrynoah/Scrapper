@@ -10,7 +10,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Ouvrir le navigateur par défaut
-open http://localhost:5000 &
+open http://localhost:5001 &
 
 # Lancer le serveur Flask
 python scrapper.py

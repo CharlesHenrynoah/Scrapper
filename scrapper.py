@@ -6,8 +6,15 @@ from post_scrapper import GeminiSynthesizer
 from collections import defaultdict
 import hashlib
 import random
+from datetime import datetime
+import google.generativeai as genai
 
 app = Flask(__name__, static_folder='.', static_url_path='')
+
+# Configuration de l'API Gemini
+GOOGLE_API_KEY = "votre_clé_api_gemini"
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel('gemini-pro')
 
 # Initialiser le synthétiseur Gemini
 gemini_synthesizer = GeminiSynthesizer("AIzaSyD8LKVDXO5zAFYbINcKHII-fiDa6rDexR4")
@@ -283,29 +290,58 @@ def ask_question():
     response = poser_question_perplexity(question, adresse_ip)
     return jsonify({"response": response})
 
+def get_perplexity_response(question):
+    try:
+        # Simulation de réponse en cas d'erreur API
+        return f"Analyse détaillée concernant : {question}"
+    except Exception as e:
+        print(f"Erreur API: {str(e)}")
+        return "Désolé, je ne peux pas accéder aux données actuellement."
+
+def formater_reponse_betting(reponse_brute):
+    """Formate la réponse dans le style betting demandé"""
+    return f"""
+🏆 ANALYSE SPORTIVE EXPERT 🔍
+
+📊 SITUATION ACTUELLE :
+{reponse_brute[:200]}...
+
+💫 POINTS CLÉS :
+{extraire_points_cles(reponse_brute)}
+
+🔥 OPPORTUNITÉ DU JOUR :
+{extraire_opportunite(reponse_brute)}
+
+📈 ANALYSE TECHNIQUE :
+{extraire_analyse(reponse_brute)}
+
+⚠️ POINTS DE VIGILANCE :
+{extraire_risques(reponse_brute)}
+
+💎 CONSEIL BETTING :
+{extraire_conseil(reponse_brute)}
+
+🎯 PRONOSTIC FINAL :
+{extraire_pronostic(reponse_brute)}
+
+#SportHunter #BettingExpert #AnalysePro
+"""
+
 @app.route('/chat', methods=['POST'])
 def handle_chat():
-    data = request.json
-    message = data.get('message', '')
-    mode = data.get('mode', 'expert')  # Mode par défaut
-
     try:
-        # Sélectionner la stratégie de réponse en fonction du mode
-        if mode == 'expert':
-            # Générer la réponse initiale
-            initial_response = generate_expert_response(message)
-            
-            # Post-traiter la réponse
-            response = post_process_expert_response(initial_response, message)
-        elif mode == 'fun':
-            response = generate_fun_response(message)
-        else:
-            response = "Mode non reconnu. Retour au mode Expert."
-
-        return jsonify({"response": response})
-    
+        data = request.json
+        question = data.get('message', '')
+        
+        # Obtenir la réponse de l'IA
+        reponse_brute = obtenir_reponse_ia(question)
+        
+        # Formater la réponse dans le style betting
+        reponse_formatee = formater_reponse_betting(reponse_brute)
+        
+        return jsonify({"response": reponse_formatee})
     except Exception as e:
-        return jsonify({"response": f"Erreur : {str(e)}"}), 500
+        return jsonify({"response": f"Erreur: {str(e)}"}), 500
 
 def generate_expert_response(query):
     # Style de réponse expert en paris sportifs
@@ -491,24 +527,11 @@ def post_process_expert_response(original_response, query):
     
     return template
 
-def chat(message, mode):
-    try:
-        # Sélectionner la stratégie de réponse en fonction du mode
-        if mode == 'expert':
-            # Générer la réponse initiale
-            initial_response = generate_expert_response(message)
-            
-            # Post-traiter la réponse
-            response = post_process_expert_response(initial_response, message)
-        elif mode == 'fun':
-            response = generate_fun_response(message)
-        else:
-            response = "Mode non reconnu. Retour au mode Expert."
-
-        return jsonify({"response": response})
-    
-    except Exception as e:
-        return jsonify({"response": f"Erreur : {str(e)}"}), 500
+def obtenir_reponse_ia(question):
+    """Obtient la réponse de Gemini"""
+    prompt = f"Analyse le match/événement suivant en tant qu'expert betting sportif : {question}"
+    response = model.generate_content(prompt)
+    return response.text
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
