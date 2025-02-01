@@ -2,22 +2,42 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SportHunter AI Assistant</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="chat-container">
-            <div id="chat-messages" class="chat-messages">
-                <div class="welcome-message">
-                    <p>Bienvenue sur SportHunter AI Assistant! 🏆</p>
-                    <p>Posez vos questions sur le sport et obtenez des réponses instantanées.</p>
+    <div class="app-container">
+        <div class="ads-container-left">
+            <div class="ads-placeholder">Publicité 1</div>
+            <div class="ads-placeholder">Publicité 2</div>
+            <div class="ads-placeholder">Publicité 3</div>
+            <div class="ads-placeholder">Publicité 4</div>
+        </div>
+        
+        <div class="container">
+            <div id="chat-container" class="chat-container">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="welcome-message">
+                        <p>Bienvenue sur SportHunter AI Assistant! 🏆</p>
+                        <p>Posez vos questions sur le sport et obtenez des réponses instantanées.</p>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <textarea id="user-input" placeholder="Posez votre question ici..." rows="3"></textarea>
+                    <div class="button-group">
+                        <button id="listen-btn" class="listen-btn" style="display:block;">🔊 Écouter</button>
+                        <button id="send-btn">Envoyer</button>
+                    </div>
                 </div>
             </div>
-            <div class="input-area">
-                <textarea id="user-input" placeholder="Posez votre question ici..." rows="3"></textarea>
-                <button id="send-btn">Envoyer</button>
-            </div>
+        </div>
+        
+        <div class="ads-container-right">
+            <div class="ads-placeholder">Publicité 5</div>
+            <div class="ads-placeholder">Publicité 6</div>
+            <div class="ads-placeholder">Publicité 7</div>
+            <div class="ads-placeholder">Publicité 8</div>
         </div>
     </div>
     <script src="/script.js"></script>

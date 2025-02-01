@@ -287,23 +287,103 @@ def ask_question():
 def handle_chat():
     data = request.json
     message = data.get('message', '')
-    mode = data.get('mode', 'pronostics')  # Mode par défaut
+    mode = data.get('mode', 'expert')  # Mode par défaut
 
     try:
         # Sélectionner la stratégie de réponse en fonction du mode
-        if mode == 'pronostics':
-            response = generer_pronostic(message)
-        elif mode == 'recherche':
-            response = recherche_sportive(message)
+        if mode == 'expert':
+            # Générer la réponse initiale
+            initial_response = generate_expert_response(message)
+            
+            # Post-traiter la réponse
+            response = post_process_expert_response(initial_response, message)
         elif mode == 'fun':
-            response = mode_fun(message)
+            response = generate_fun_response(message)
         else:
-            response = "Mode non reconnu. Retour au mode Pronostics."
+            response = "Mode non reconnu. Retour au mode Expert."
 
         return jsonify({"response": response})
     
     except Exception as e:
         return jsonify({"response": f"Erreur : {str(e)}"}), 500
+
+def generate_expert_response(query):
+    # Style de réponse expert en paris sportifs
+    expert_styles = {
+        "champions_league": [
+            "🏆 Champions League : Focus Expert 🔍\n\n"
+            "📊 Cotes et Pronostics Clés :\n"
+            "- Favoris actuels : Manchester City, Bayern Munich\n"
+            "- Équipes surprises : Newcastle, Inter Milan\n\n"
+            "🔥 Pépite du Moment : \n"
+            "Inter Milan, cote à 5.50 pour un parcours jusqu'en 1/2 finale. Value bet énorme !\n\n"
+            "💡 Analyse Rapide :\n"
+            "- Possession moyenne des tops équipes : 58-62%\n"
+            "- Expected Goals (xG) décisif : City et Bayern au-dessus de 1.8\n"
+            "- Transitions défensives : clé pour les victoires\n\n"
+            "⚠️ Attention :\n"
+            "- Blessures et suspensions peuvent tout changer\n"
+            "- Les matchs à élimination directe sont imprévisibles\n\n"
+            "🎲 Petit Défi : \n"
+            "Quel sera selon vous le score du prochain match de Ligue des Champions ?\n\n"
+            "Rejoignez-moi sur Telegram pour des pronostics encore plus exclusifs ! 💥\n\n"
+            "Une question qui tue : Êtes-vous prêt à parier sur votre équipe favorite ? 🤔"
+        ],
+        "nfl": [
+            "🏈 NFL : Analyse Pro 🔥\n\n"
+            "📊 Tendances de la Semaine :\n"
+            "- Équipes en forme : Chiefs, 49ers\n"
+            "- Matchs à risque : Eagles vs Cowboys\n\n"
+            "🔥 Pépite du Moment : \n"
+            "Chiefs, cote à 2.20 pour victoire finale. Value bet à suivre !\n\n"
+            "💡 Stats Clés :\n"
+            "- DVOA moyen des tops équipes : +25%\n"
+            "- Success Rate offensif : Chiefs à 52%\n"
+            "- Pression défensive : 49ers leaders\n\n"
+            "⚠️ Points de Vigilance :\n"
+            "- Blessures des quarterbacks\n"
+            "- Performances en zone rouge\n\n"
+            "🎲 Challenge Pronostic : \n"
+            "Qui verra le Super Bowl cette année ?\n\n"
+            "Rejoignez mon groupe Telegram pour des insights exclusifs ! 💥\n\n"
+            "La question qui tue : Prêt à miser gros ? 🤔"
+        ],
+        "default": [
+            "🏆 Analyse Sportive Expert 🔍\n\n"
+            "📊 Pronostics du Moment :\n"
+            "- Équipes en vue\n"
+            "- Tendances actuelles\n\n"
+            "🔥 Pépite à Suivre : \n"
+            "Un pari qui va faire mal !\n\n"
+            "💡 Analyse Technique :\n"
+            "- Statistiques clés\n"
+            "- Performances récentes\n\n"
+            "⚠️ Points d'Attention :\n"
+            "- Facteurs risques\n"
+            "- Éléments à surveiller\n\n"
+            "🎲 Défi du Jour : \n"
+            "Votre pronostic ?\n\n"
+            "Rejoignez mon Telegram pour plus ! 💥\n\n"
+            "La question qui tue : Prêt à relever le défi ? 🤔"
+        ]
+    }
+    
+    # Logique de génération de réponse
+    if "champions league" in query.lower():
+        return expert_styles["champions_league"][0]
+    elif "nfl" in query.lower():
+        return expert_styles["nfl"][0]
+    else:
+        return expert_styles["default"][0]
+
+def generate_fun_response(query):
+    # Réponse ludique et décalée
+    fun_responses = [
+        "Wow, quelle question sportive ! 🏆",
+        "On va s'éclater avec ce sujet ! 🔥",
+        "Prêt pour une analyse qui décoiffe ? 💥"
+    ]
+    return random.choice(fun_responses)
 
 def generer_pronostic(message):
     """
@@ -324,6 +404,19 @@ def recherche_sportive(message):
     """
     return synthesizer._requete_gemini(prompt)
 
+def mode_expert(message):
+    """
+    Mode Expert avec des analyses détaillées et statistiques avancées.
+    """
+    synthesizer = GeminiSynthesizer("AIzaSyD8LKVDXO5zAFYbINcKHII-fiDa6rDexR4")
+    prompt = f"""
+    Mode Expert : Analyse approfondie et technique.
+    Fournis une réponse ultra-détaillée avec des statistiques précises, 
+    des insights techniques et une analyse stratégique.
+    Sujet : {message}
+    """
+    return synthesizer._requete_gemini(prompt)
+
 def mode_fun(message):
     """
     Mode Fun avec des réponses humoristiques et interactives.
@@ -335,6 +428,87 @@ def mode_fun(message):
     Message : {message}
     """
     return synthesizer._requete_gemini(prompt)
+
+def post_process_expert_response(original_response, query):
+    """
+    Post-traite la réponse pour la transformer en style expert de pronostics sportifs
+    """
+    # Dictionnaire de templates adaptables
+    templates = {
+        "champions_league": [
+            "🏆 Champions League : Verdict Final 🔍\n\n"
+            "📊 Palmarès Historique :\n"
+            "- Dernier Vainqueur : {winner}\n"
+            "- Nombre de Titres : {titles}\n\n"
+            "🔥 Analyse du Sacre : \n"
+            "{original_response}\n\n"
+            "💡 Statistiques Clés :\n"
+            "- Performance globale : Impressionnante\n"
+            "- Parcours en Ligue des Champions : Remarquable\n\n"
+            "⚠️ Points d'Analyse :\n"
+            "- Stratégie gagnante\n"
+            "- Facteurs de succès\n\n"
+            "🎲 Défi Expert : \n"
+            "Qui sera le prochain champion ?\n\n"
+            "Rejoignez mon groupe Telegram pour des insights exclusifs ! 💥\n\n"
+            "La question qui tue : Prêt à parier sur le prochain vainqueur ? 🤔"
+        ],
+        "default": [
+            "🏆 Analyse Sportive Pro 🔍\n\n"
+            "📊 Insights du Moment :\n"
+            "{original_response}\n\n"
+            "🔥 Point Technique : \n"
+            "- Analyse approfondie\n"
+            "- Contexte stratégique\n\n"
+            "💡 Pronostic Expert :\n"
+            "- Tendances actuelles\n"
+            "- Perspectives de performance\n\n"
+            "⚠️ Points de Vigilance :\n"
+            "- Éléments à surveiller\n"
+            "- Facteurs potentiels\n\n"
+            "🎲 Challenge du Jour : \n"
+            "Votre lecture du sujet ?\n\n"
+            "Rejoignez mon Telegram pour plus ! 💥\n\n"
+            "La question qui tue : Êtes-vous d'accord ? 🤔"
+        ]
+    }
+    
+    # Logique de sélection du template
+    if "champions league" in query.lower() or "champion" in query.lower():
+        # Extraction des informations si possible
+        winner = "Real Madrid" if "champions league" in query.lower() else "Information non disponible"
+        titles = "14 titres" if "real madrid" in winner.lower() else "Variable"
+        
+        template = templates["champions_league"][0].format(
+            winner=winner,
+            titles=titles,
+            original_response=original_response
+        )
+    else:
+        template = templates["default"][0].format(
+            original_response=original_response
+        )
+    
+    return template
+
+def chat(message, mode):
+    try:
+        # Sélectionner la stratégie de réponse en fonction du mode
+        if mode == 'expert':
+            # Générer la réponse initiale
+            initial_response = generate_expert_response(message)
+            
+            # Post-traiter la réponse
+            response = post_process_expert_response(initial_response, message)
+        elif mode == 'fun':
+            response = generate_fun_response(message)
+        else:
+            response = "Mode non reconnu. Retour au mode Expert."
+
+        return jsonify({"response": response})
+    
+    except Exception as e:
+        return jsonify({"response": f"Erreur : {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
